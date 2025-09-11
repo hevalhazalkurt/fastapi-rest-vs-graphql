@@ -1,1 +1,2 @@
-# fastapi-rest-vs-graphql
+# FastAPI Rest vs GraphQL
+
