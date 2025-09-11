@@ -1,2 +1,2 @@
-# FastAPI Rest vs GraphQL
+# FastAPI Rest vs GraphQL Showdown
 
