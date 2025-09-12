@@ -26,6 +26,19 @@ dependencies = [
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.ruff]
+target-version = "py311"
+src = ["app", "tests"]
+line-length = 250
+
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "I", "UP"]
+ignore = ["E712", "E402", "E711",  "F401", "E721"]
+
+[tool.ruff.format]
+quote-style = "double"
+
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.13.0"
 mypy = "^1.17.1"

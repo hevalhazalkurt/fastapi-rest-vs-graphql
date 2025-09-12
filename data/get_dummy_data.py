@@ -9,12 +9,13 @@ from sqlalchemy import insert
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from app.db.session import AsyncSessionLocal
+from app.models.association_tables import MovieGenreAssociation
 from app.models.director import Director
 from app.models.genre import Genre
 from app.models.movie import Movie
-from app.models.association_tables import MovieGenreAssociation
 
 CSV_FILE_PATH = "data/dummy_data.csv"
+
 
 class DummyData(BaseModel):
     title: str
@@ -25,7 +26,7 @@ class DummyData(BaseModel):
 
 async def get_file_data():
     try:
-        with open(CSV_FILE_PATH, mode="r") as csv_file:
+        with open(CSV_FILE_PATH) as csv_file:
             dummy_movie_data = csv_file.readlines()
     except Exception as e:
         print(f"Error for reading {CSV_FILE_PATH}: {e}")
@@ -33,11 +34,10 @@ async def get_file_data():
     return dummy_movie_data[1::]
 
 
-
 async def seed_dummy_data():
-    directors_to_create = dict()
-    genres_to_create = dict()
-    movies_to_create = dict()
+    directors_to_create: dict = dict()
+    genres_to_create: dict = dict()
+    movies_to_create: dict = dict()
     associations_to_create = []
 
     async with AsyncSessionLocal() as db:
@@ -62,14 +62,11 @@ async def seed_dummy_data():
                 if genre_name not in genres_to_create:
                     genres_to_create[genre_name] = genre
 
-                associations_to_create.append(
-                    {"movie_id": movie["uuid"], "genre_id": genre["uuid"]}
-                )
+                associations_to_create.append({"movie_id": movie["uuid"], "genre_id": genre["uuid"]})
 
             processed += 1
 
-        print(
-            f"Total directors to create: {len(directors_to_create)}, total genres to create: {len(genres_to_create)}, total movies to create: {len(movies_to_create)}")
+        print(f"Total directors to create: {len(directors_to_create)}, total genres to create: {len(genres_to_create)}, total movies to create: {len(movies_to_create)}")
 
         print("\nCreating genres...")
         try:

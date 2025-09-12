@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, UUID
+from sqlalchemy import UUID, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base_model import BaseDBModel
