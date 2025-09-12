@@ -10,5 +10,5 @@ from app.models.mixins import UUIDMixin
 class Genre(BaseDBModel, UUIDMixin):
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
     movies: Mapped[List["Movie"]] = relationship(
-        secondary="moviegenreassociation", back_populates="genre"
+        secondary="moviegenreassociation", back_populates="genres"
     )
