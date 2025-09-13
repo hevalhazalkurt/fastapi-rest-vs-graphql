@@ -1,9 +1,7 @@
 from sqlalchemy import UUID, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base_model import BaseDBModel
-from app.models.director import Director
-from app.models.genre import Genre
 from app.models.mixins import UUIDMixin
 
 
@@ -13,5 +11,3 @@ class Movie(BaseDBModel, UUIDMixin):
 
     director_id: Mapped[UUID] = mapped_column(UUID, ForeignKey("director.uuid"))
 
-    director: Mapped["Director"] = relationship(back_populates="movies")
-    genres: Mapped[list["Genre"]] = relationship(secondary="moviegenreassociation", back_populates="movies")
