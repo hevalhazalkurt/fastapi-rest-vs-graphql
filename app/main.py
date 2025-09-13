@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.status import router as status_router
+from .api import router
 
 app = FastAPI(
     title="REST vs GraphQL Showdown",
@@ -8,7 +8,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
-app.include_router(status_router, tags=["Server Status"])
+app.include_router(router)
 
 
 @app.get("/")

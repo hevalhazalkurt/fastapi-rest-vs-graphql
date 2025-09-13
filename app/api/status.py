@@ -15,7 +15,7 @@ class HealthResponse(BaseModel):
     db_status: str
 
 
-router = APIRouter(tags=["Server Status"])
+router = APIRouter()
 
 
 @router.get("/status", response_model=StatusResponse)

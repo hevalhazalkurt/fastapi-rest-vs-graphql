@@ -1,0 +1,62 @@
+from typing import Sequence, Any
+from uuid import UUID
+
+from sqlalchemy import select, func, Row
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.utils import get_all_scalars, get_all, scalar
+from app.models import Director, Movie
+from app.repository.base_repo import AbstractCRUD
+
+
+class DirectorCRUD(AbstractCRUD):
+    async def get_one(self, db: AsyncSession, id: UUID | None = None, name: str | None = None, with_movies: bool = False) :
+        filter = Director.uuid == id if id else Director.name == name
+        if with_movies:
+            base_query = select(
+                Director,
+                func.array_agg(
+                    func.json_build_object(
+                        "uuid",
+                        Movie.uuid,
+                        "title",
+                        Movie.title,
+                        "release_year",
+                        Movie.release_year
+                    )
+                )
+            ).outerjoin(Movie, Movie.director_id == Director.uuid).where(filter).group_by(Director.uuid)
+            return await get_all(db, base_query)
+        return await scalar(db, select(Director).where(filter))
+
+    async def get_all(self, db: AsyncSession, skip: int = 0, limit: int = 20, with_movies: bool = False) -> Sequence[Director] | Sequence[Row[Any]]:
+        if with_movies:
+            base_query = select(
+                Director,
+                func.array_agg(
+                    func.json_build_object(
+                        "uuid",
+                        Movie.uuid,
+                        "title",
+                        Movie.title,
+                        "release_year",
+                        Movie.release_year
+                    )
+                )
+            ).outerjoin(Movie, Movie.director_id == Director.uuid).group_by(Director.uuid).order_by(Director.name).offset(skip).limit(limit)
+            return await get_all(db, base_query)
+
+        return await get_all_scalars(db, select(Director).order_by(Director.name).offset(skip).limit(limit))
+
+    async def create(self, db: AsyncSession) -> dict:
+        pass
+
+    async def update(self, db: AsyncSession, id: UUID) -> dict:
+        pass
+
+    async def delete(self, db: AsyncSession, id: UUID) -> dict:
+        pass
+
+
+def get_director_crud() -> DirectorCRUD:
+    return DirectorCRUD()
