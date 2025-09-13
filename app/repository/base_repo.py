@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 class AbstractCRUD(abc.ABC):
     @abc.abstractmethod
-    async def get_one(self, db: AsyncSession, id: UUID) -> dict:
+    async def get_one(self, db: AsyncSession, id: UUID) -> Any:
         pass
 
 
@@ -17,15 +17,15 @@ class AbstractCRUD(abc.ABC):
 
 
     @abc.abstractmethod
-    async def create(self, db: AsyncSession) -> dict:
+    async def create(self, db: AsyncSession) -> Any:
         pass
 
 
     @abc.abstractmethod
-    async def update(self, db: AsyncSession, id: UUID) -> dict:
+    async def update(self, db: AsyncSession, id: UUID) -> Any:
         pass
 
 
     @abc.abstractmethod
-    async def delete(self, db: AsyncSession, id: UUID) -> dict:
+    async def delete(self, db: AsyncSession, id: UUID) -> Any:
         pass

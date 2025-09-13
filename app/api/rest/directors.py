@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.schemas.directors import DirectorInDB, DirectorExtended
+from app.schemas.directors import DirectorInDB, DirectorExtended, DirectorCreate
 from app.services.directors import DirectorsService
 
 router = APIRouter()
@@ -35,5 +35,12 @@ async def get_director(
     assert name
     return await service.get_director_by_name(name, with_movies)
 
+
+@router.post("/director")
+async def create_director(
+        director_data: DirectorCreate,
+        service: DirectorsService = Depends(DirectorsService)
+) -> DirectorInDB:
+    return await service.create_director(director_data)
 
 

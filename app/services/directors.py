@@ -7,7 +7,7 @@ from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_404_NOT_FOUND
 
 from app.db.session import get_db
 from app.repository.directors import DirectorCRUD, get_director_crud
-from app.schemas.directors import DirectorInDB, DirectorExtended
+from app.schemas.directors import DirectorInDB, DirectorExtended, DirectorCreate
 from app.schemas.movies import MovieInDB
 
 
@@ -26,7 +26,7 @@ class DirectorsService:
                 directors_with_movies: list[DirectorExtended] = []
                 for director, movies in results:
                     director_resp = DirectorExtended.model_validate(director)
-                    director_resp.movies = [MovieInDB.model_validate(movie) for movie in movies]
+                    director_resp.movies =  [MovieInDB.model_validate(movie) for movie in movies] if movies else []
                     directors_with_movies.append(director_resp)
                 return directors_with_movies
             return [DirectorInDB.model_validate(data) for data in results]
@@ -42,7 +42,7 @@ class DirectorsService:
             result = await self.crud.get_one(self.db, id=id, with_movies=with_movies)
             if with_movies:
                 director = DirectorExtended.model_validate(result[0][0])
-                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]]
+                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
@@ -57,13 +57,24 @@ class DirectorsService:
             result = await self.crud.get_one(self.db, name=name, with_movies=with_movies)
             if with_movies:
                 director = DirectorExtended.model_validate(result[0][0])
-                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]]
+                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
             raise HTTPException(
                 status_code=HTTP_404_NOT_FOUND,
                 detail=f"Could not fetch a director by name {name}. {e}"
+            )
+
+
+    async def create_director(self, director_data: DirectorCreate) -> DirectorInDB:
+        try:
+            result = await self.crud.create(self.db, name=director_data.name)
+            return DirectorInDB.model_validate(result)
+        except Exception as e:
+            raise HTTPException(
+                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"An error occurred while creating a director. {e}"
             )
 
 

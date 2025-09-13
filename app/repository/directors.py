@@ -1,3 +1,4 @@
+import uuid
 from typing import Sequence, Any
 from uuid import UUID
 
@@ -15,16 +16,16 @@ class DirectorCRUD(AbstractCRUD):
         if with_movies:
             base_query = select(
                 Director,
-                func.array_agg(
-                    func.json_build_object(
-                        "uuid",
-                        Movie.uuid,
-                        "title",
-                        Movie.title,
-                        "release_year",
-                        Movie.release_year
-                    )
-                )
+                func.coalesce(
+                    func.array_agg(
+                        func.json_build_object(
+                            "uuid", Movie.uuid,
+                            "title", Movie.title,
+                            "release_year", Movie.release_year
+                        )
+                    ).filter(Movie.uuid.is_not(None)),
+                    None
+                ).label("movies")
             ).outerjoin(Movie, Movie.director_id == Director.uuid).where(filter).group_by(Director.uuid)
             return await get_all(db, base_query)
         return await scalar(db, select(Director).where(filter))
@@ -33,23 +34,30 @@ class DirectorCRUD(AbstractCRUD):
         if with_movies:
             base_query = select(
                 Director,
-                func.array_agg(
-                    func.json_build_object(
-                        "uuid",
-                        Movie.uuid,
-                        "title",
-                        Movie.title,
-                        "release_year",
-                        Movie.release_year
-                    )
+                func.coalesce(
+                    func.array_agg(
+                        func.json_build_object(
+                            "uuid",
+                            Movie.uuid,
+                            "title",
+                            Movie.title,
+                            "release_year",
+                            Movie.release_year
+                        )
+                    ).filter(Movie.uuid.is_not(None)),
+                    None
                 )
             ).outerjoin(Movie, Movie.director_id == Director.uuid).group_by(Director.uuid).order_by(Director.name).offset(skip).limit(limit)
             return await get_all(db, base_query)
 
         return await get_all_scalars(db, select(Director).order_by(Director.name).offset(skip).limit(limit))
 
-    async def create(self, db: AsyncSession) -> dict:
-        pass
+    async def create(self, db: AsyncSession, name: str) -> Director:
+        new_director = Director(name=name, uuid=uuid.uuid4())
+        db.add(new_director)
+        await db.flush()
+        return new_director
+
 
     async def update(self, db: AsyncSession, id: UUID) -> dict:
         pass

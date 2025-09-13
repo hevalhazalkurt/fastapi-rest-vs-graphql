@@ -6,9 +6,14 @@ from app.schemas.base_schema import ResponseSchema
 from app.schemas.movies import MovieInDB
 
 
-class DirectorInDB(ResponseSchema):
-    uuid: UUID
+class DirectorCreate(ResponseSchema):
     name: str
+
+
+class DirectorInDB(DirectorCreate):
+    uuid: UUID
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DirectorExtended(DirectorInDB):
