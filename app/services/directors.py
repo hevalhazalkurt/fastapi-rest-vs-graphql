@@ -3,21 +3,22 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.db.session import get_db
 from app.repository.directors import DirectorCRUD, get_director_crud
-from app.schemas.directors import DirectorInDB, DirectorExtended, DirectorCreate
+from app.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
 from app.schemas.movies import MovieInDB
 
 
 class DirectorsService:
-    def __init__(self,
-                 db: AsyncSession = Depends(get_db),
-                 crud: DirectorCRUD = Depends(get_director_crud),):
+    def __init__(
+        self,
+        db: AsyncSession = Depends(get_db),
+        crud: DirectorCRUD = Depends(get_director_crud),
+    ):
         self.db = db
         self.crud = crud
-
 
     async def get_all_directors(self, skip: int = 0, limit: int = 20, with_movies: bool = False) -> Sequence[DirectorInDB | DirectorExtended]:
         try:
@@ -26,18 +27,15 @@ class DirectorsService:
                 directors_with_movies: list[DirectorExtended] = []
                 for director, movies in results:
                     director_resp = DirectorExtended.model_validate(director)
-                    director_resp.movies =  [MovieInDB.model_validate(movie) for movie in movies] if movies else []
+                    director_resp.movies = [MovieInDB.model_validate(movie) for movie in movies] if movies else []
                     directors_with_movies.append(director_resp)
                 return directors_with_movies
             return [DirectorInDB.model_validate(data) for data in results]
         except Exception as e:
-            raise HTTPException(
-                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"An error occurred while fetching directors. {e}"
-            )
-
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while fetching directors. {e}")
 
     async def get_director_by_id(self, id: UUID, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
+        result = None
         try:
             result = await self.crud.get_one(self.db, id=id, with_movies=with_movies)
             if with_movies:
@@ -46,13 +44,11 @@ class DirectorsService:
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
-                detail=f"Could not fetch a director by id {id}. {e}"
-            )
-
+            error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with id {id} not found."
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
     async def get_director_by_name(self, name: str, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
+        result = None
         try:
             result = await self.crud.get_one(self.db, name=name, with_movies=with_movies)
             if with_movies:
@@ -61,22 +57,26 @@ class DirectorsService:
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
-                detail=f"Could not fetch a director by name {name}. {e}"
-            )
-
+            error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with id {id} not found."
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
     async def create_director(self, director_data: DirectorCreate) -> DirectorInDB:
         try:
             result = await self.crud.create(self.db, name=director_data.name)
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(
-                status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"An error occurred while creating a director. {e}"
-            )
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while creating a director. {e}")
 
+    async def update_director(self, director_data: DirectorUpdate) -> DirectorInDB:
+        try:
+            result = await self.crud.update(self.db, director_data=director_data)
+            return DirectorInDB.model_validate(result)
+        except Exception as e:
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while updating a director. {e}")
 
-
-
+    async def remove_director(self, id: UUID) -> DirectorInDB:
+        try:
+            result = await self.crud.delete(self.db, id=id)
+            return DirectorInDB.model_validate(result)
+        except Exception as e:
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while removing a director. {e}")

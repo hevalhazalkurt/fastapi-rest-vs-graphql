@@ -53,7 +53,9 @@ async def seed_dummy_data():
             if director_name not in directors_to_create:
                 directors_to_create[director_name] = director
 
-            movie = movies_to_create.get(movie_title, {"uuid": uuid4(), "title": movie_title, "release_year": int(movie_year), "director_id": director["uuid"]})
+            movie = movies_to_create.get(
+                movie_title, {"uuid": uuid4(), "title": movie_title, "release_year": int(movie_year), "director_id": director["uuid"]}
+            )
             if movie_title not in movies_to_create:
                 movies_to_create[movie_title] = movie
 
@@ -66,7 +68,9 @@ async def seed_dummy_data():
 
             processed += 1
 
-        print(f"Total directors to create: {len(directors_to_create)}, total genres to create: {len(genres_to_create)}, total movies to create: {len(movies_to_create)}")
+        print(
+            f"Total directors to create: {len(directors_to_create)}, total genres to create: {len(genres_to_create)}, total movies to create: {len(movies_to_create)}"
+        )
 
         print("\nCreating genres...")
         try:

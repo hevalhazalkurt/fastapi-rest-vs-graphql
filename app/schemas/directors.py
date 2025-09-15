@@ -20,3 +20,8 @@ class DirectorExtended(DirectorInDB):
     movies: list[MovieInDB] | None = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DirectorUpdate(ResponseSchema):
+    uuid: UUID
+    name: str

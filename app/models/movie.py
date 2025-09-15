@@ -10,4 +10,3 @@ class Movie(BaseDBModel, UUIDMixin):
     release_year: Mapped[int] = mapped_column(Integer)
 
     director_id: Mapped[UUID] = mapped_column(UUID, ForeignKey("director.uuid"))
-
