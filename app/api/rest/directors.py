@@ -10,16 +10,12 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_all_directors(
-    with_movies: bool = False, skip: int = 0, limit: int = 20, service: DirectorsService = Depends(DirectorsService)
-) -> Sequence[DirectorInDB | DirectorExtended]:
+async def get_all_directors(with_movies: bool = False, skip: int = 0, limit: int = 20, service: DirectorsService = Depends(DirectorsService)) -> Sequence[DirectorInDB | DirectorExtended]:
     return await service.get_all_directors(skip, limit, with_movies)
 
 
 @router.get("/director")
-async def get_director(
-    id: UUID | None = None, name: str | None = None, with_movies: bool = False, service: DirectorsService = Depends(DirectorsService)
-) -> DirectorInDB | DirectorExtended:
+async def get_director(id: UUID | None = None, name: str | None = None, with_movies: bool = False, service: DirectorsService = Depends(DirectorsService)) -> DirectorInDB | DirectorExtended:
     if not name and not id:
         raise HTTPException(status_code=404, detail="Director id or name required")
 

@@ -1,6 +1,5 @@
 import uuid
-from typing import Sequence
-from typing import Any
+from typing import Any, Sequence
 from uuid import UUID
 
 from sqlalchemy import Row, func, select
@@ -20,9 +19,7 @@ class DirectorCRUD(AbstractCRUD):
                 select(
                     Director,
                     func.coalesce(
-                        func.array_agg(func.json_build_object("uuid", Movie.uuid, "title", Movie.title, "release_year", Movie.release_year)).filter(
-                            Movie.uuid.is_not(None)
-                        ),
+                        func.array_agg(func.json_build_object("uuid", Movie.uuid, "title", Movie.title, "release_year", Movie.release_year)).filter(Movie.uuid.is_not(None)),
                         None,
                     ).label("movies"),
                 )
@@ -39,9 +36,7 @@ class DirectorCRUD(AbstractCRUD):
                 select(
                     Director,
                     func.coalesce(
-                        func.array_agg(func.json_build_object("uuid", Movie.uuid, "title", Movie.title, "release_year", Movie.release_year)).filter(
-                            Movie.uuid.is_not(None)
-                        ),
+                        func.array_agg(func.json_build_object("uuid", Movie.uuid, "title", Movie.title, "release_year", Movie.release_year)).filter(Movie.uuid.is_not(None)),
                         None,
                     ),
                 )

@@ -1,6 +1,5 @@
 import abc
-from typing import Sequence
-from typing import Any
+from typing import Any, Sequence
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
