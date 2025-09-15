@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.logging_setup import logger
 from app.db.session import get_db
 
 
@@ -36,7 +37,7 @@ async def get_server_health(db: AsyncSession = Depends(get_db)):
         result.scalar_one()
         db_status = "ok"
     except Exception as e:
-        print(f"Database connection failed: {e}")
+        logger.error(f"Database connection failed: {e}", exc_info=e)
         db_status = "error"
 
     return {"status": "ok", "db_status": db_status}

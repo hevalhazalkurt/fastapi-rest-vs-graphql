@@ -5,6 +5,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
+from app.core.logging_setup import logger
 from app.db.session import get_db
 from app.repository.directors import DirectorCRUD, get_director_crud
 from app.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
@@ -32,7 +33,9 @@ class DirectorsService:
                 return directors_with_movies
             return [DirectorInDB.model_validate(data) for data in results]
         except Exception as e:
-            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while fetching directors. {e}")
+            error_detail = "An error occurred while fetching directors."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
     async def get_director_by_id(self, id: UUID, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
         result = None
@@ -45,6 +48,7 @@ class DirectorsService:
             return DirectorInDB.model_validate(result)
         except Exception as e:
             error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with id {id} not found."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
     async def get_director_by_name(self, name: str, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
@@ -58,6 +62,7 @@ class DirectorsService:
             return DirectorInDB.model_validate(result)
         except Exception as e:
             error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with id {id} not found."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
     async def create_director(self, director_data: DirectorCreate) -> DirectorInDB:
@@ -65,18 +70,24 @@ class DirectorsService:
             result = await self.crud.create(self.db, name=director_data.name)
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while creating a director. {e}")
+            error_detail = "An error occurred while creating a director."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
     async def update_director(self, director_data: DirectorUpdate) -> DirectorInDB:
         try:
             result = await self.crud.update(self.db, director_data=director_data)
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while updating a director. {e}")
+            error_detail = "An error occurred while updating a director."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
     async def remove_director(self, id: UUID) -> DirectorInDB:
         try:
             result = await self.crud.delete(self.db, id=id)
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while removing a director. {e}")
+            error_detail = "An error occurred while removing a director."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)

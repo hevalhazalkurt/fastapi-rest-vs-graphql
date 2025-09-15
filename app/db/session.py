@@ -3,6 +3,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
+from app.core.logging_setup import logger
 
 engine = create_async_engine(
     settings.DATABASE_URL or "",
@@ -25,6 +26,7 @@ async def get_db() -> AsyncGenerator:
             yield session
         except Exception as e:
             await session.rollback()
+            logger.error(e, exc_info=e)
             raise e
         else:
             await session.commit()
