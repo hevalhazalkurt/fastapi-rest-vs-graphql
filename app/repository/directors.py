@@ -12,7 +12,7 @@ from app.schemas.directors import DirectorUpdate
 
 
 class DirectorCRUD(AbstractCRUD):
-    async def get_one(self, db: AsyncSession, id: UUID | None = None, name: str | None = None, with_movies: bool = False):
+    async def get_one(self, db: AsyncSession, id: UUID | None = None, name: str | None = None, with_movies: bool = False) -> Director | Sequence[Row[Any]] | None:
         filter = Director.uuid == id if id else Director.name == name
         if with_movies:
             base_query = (
@@ -56,14 +56,15 @@ class DirectorCRUD(AbstractCRUD):
         await db.flush()
         return new_director
 
-    async def update(self, db: AsyncSession, director_data: DirectorUpdate) -> Director:
+    async def update(self, db: AsyncSession, director_data: DirectorUpdate) -> Director | Sequence[Row[Any]] | None:
         director = await self.get_one(db, id=director_data.uuid)
-        director.name = director_data.name
-        db.add(director)
-        await db.flush()
+        if director and isinstance(director, Director):
+            director.name = director_data.name
+            db.add(director)
+            await db.flush()
         return director
 
-    async def delete(self, db: AsyncSession, id: UUID) -> Director:
+    async def delete(self, db: AsyncSession, id: UUID) -> Director | Sequence[Row[Any]] | None:
         director = await self.get_one(db, id=id)
         await db.delete(director)
         return director

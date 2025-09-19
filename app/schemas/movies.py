@@ -15,6 +15,11 @@ class MovieSort(Enum):
     asc = "asc"
     desc = "desc"
 
+class MovieCreate(ResponseSchema):
+    title: str
+    release_year: int
+    director_id: UUID
+
 
 class MovieInDB(ResponseSchema):
     uuid: UUID
@@ -24,8 +29,21 @@ class MovieInDB(ResponseSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
+class MovieInDirector(ResponseSchema):
+    uuid: UUID
+    title: str
+    release_year: int
+
+
 class MovieExtended(MovieInDB):
     director: str | None = None
     genre: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MovieUpdate(ResponseSchema):
+    id: UUID
+    title: str | None = None
+    release_year: int | None = None
+    director_id: UUID | None = None

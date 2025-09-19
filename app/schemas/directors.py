@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import ConfigDict
 
 from app.schemas.base_schema import ResponseSchema
-from app.schemas.movies import MovieInDB
+from app.schemas.movies import MovieInDirector
 
 
 class DirectorCreate(ResponseSchema):
@@ -17,7 +17,7 @@ class DirectorInDB(DirectorCreate):
 
 
 class DirectorExtended(DirectorInDB):
-    movies: list[MovieInDB] | None = []
+    movies: list[MovieInDirector] | None = []
 
     model_config = ConfigDict(from_attributes=True)
 

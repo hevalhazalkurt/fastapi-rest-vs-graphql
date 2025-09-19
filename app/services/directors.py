@@ -9,7 +9,7 @@ from app.core.logging_setup import logger
 from app.db.session import get_db
 from app.repository.directors import DirectorCRUD, get_director_crud
 from app.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
-from app.schemas.movies import MovieInDB
+from app.schemas.movies import MovieInDirector
 
 
 class DirectorsService:
@@ -28,7 +28,7 @@ class DirectorsService:
                 directors_with_movies: list[DirectorExtended] = []
                 for director, movies in results:
                     director_resp = DirectorExtended.model_validate(director)
-                    director_resp.movies = [MovieInDB.model_validate(movie) for movie in movies] if movies else []
+                    director_resp.movies = [MovieInDirector.model_validate(movie) for movie in movies] if movies else []
                     directors_with_movies.append(director_resp)
                 return directors_with_movies
             return [DirectorInDB.model_validate(data) for data in results]
@@ -41,9 +41,9 @@ class DirectorsService:
         result = None
         try:
             result = await self.crud.get_one(self.db, id=id, with_movies=with_movies)
-            if with_movies:
+            if with_movies and isinstance(result, Sequence):
                 director = DirectorExtended.model_validate(result[0][0])
-                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
+                director.movies = [MovieInDirector.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
@@ -55,9 +55,9 @@ class DirectorsService:
         result = None
         try:
             result = await self.crud.get_one(self.db, name=name, with_movies=with_movies)
-            if with_movies:
+            if with_movies and isinstance(result, Sequence):
                 director = DirectorExtended.model_validate(result[0][0])
-                director.movies = [MovieInDB.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
+                director.movies = [MovieInDirector.model_validate(movie) for movie in result[0][1]] if result[0][1] else []
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
