@@ -61,7 +61,7 @@ class DirectorsService:
                 return director
             return DirectorInDB.model_validate(result)
         except Exception as e:
-            error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with id {id} not found."
+            error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with name {name} not found."
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
