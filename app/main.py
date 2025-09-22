@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .api import router
+from .api import graphql_app, rest_router
 
 app = FastAPI(
     title="REST vs GraphQL Showdown",
@@ -8,7 +8,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
-app.include_router(router)
+app.include_router(rest_router)
+app.include_router(graphql_app, prefix="/graphql")
 
 
 @app.get("/")
