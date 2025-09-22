@@ -7,6 +7,8 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
+from app.models import MovieGenreAssociation
+from app.repository.genres import get_genre_crud
 from app.repository.movies import MovieCRUD, get_movie_crud
 from app.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
 
@@ -59,7 +61,14 @@ class MovieService:
         result = None
         try:
             result = await self.crud.create(self.db, movie_data=movie_data)
-            # TODO: Add step to create genre relationship here
+            if movie_data.genre and result:
+                genres = movie_data.genre.split("|")
+                genre_crud = get_genre_crud()
+                for g in genres:
+                    genre_name = g.strip()
+                    genre = await genre_crud.create(self.db, genre_name)
+                    self.db.add(MovieGenreAssociation(movie_id=result.uuid, genre_id=genre.uuid))
+
             return MovieInDB.model_validate(result)
         except Exception as e:
             error_detail = "An error occurred while creating a movie." if result else "Director not found"

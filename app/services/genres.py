@@ -3,12 +3,12 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
 from app.repository.genres import GenreCRUD, get_genre_crud
-from app.schemas.genres import GenreInDB, GenreExtended, GenreCreate, GenreUpdate
+from app.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
 from app.schemas.movies import MovieInDB
 
 
@@ -21,7 +21,6 @@ class GenresService:
         self.db = db
         self.crud = crud
 
-
     async def get_all_genres(self, skip: int = 0, limit: int = 20) -> Sequence[GenreInDB]:
         try:
             results: Sequence = await self.crud.get_all(self.db, skip=skip, limit=limit)
@@ -30,7 +29,6 @@ class GenresService:
             error_detail = "An error occurred while fetching genres."
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
-
 
     async def get_genre_by_id(self, id: UUID, with_movies: bool = False) -> GenreInDB | GenreExtended:
         result = None
@@ -46,7 +44,6 @@ class GenresService:
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
-
     async def get_genre_by_name(self, name: str, with_movies: bool = False) -> GenreInDB | GenreExtended:
         result = None
         try:
@@ -61,7 +58,6 @@ class GenresService:
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
-
     async def create_genre(self, genre_data: GenreCreate) -> GenreInDB:
         try:
             result = await self.crud.create(self.db, name=genre_data.name)
@@ -70,7 +66,6 @@ class GenresService:
             error_detail = "An error occurred while creating a genre."
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
-
 
     async def update_genre(self, genre_data: GenreUpdate) -> GenreInDB:
         try:

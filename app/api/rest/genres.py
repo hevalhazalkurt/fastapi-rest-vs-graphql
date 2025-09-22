@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.schemas.genres import GenreInDB, GenreExtended, GenreCreate, GenreUpdate
+from app.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
 from app.services.genres import GenresService
 
 router = APIRouter()

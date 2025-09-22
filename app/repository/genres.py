@@ -1,14 +1,14 @@
 import uuid
-from typing import Sequence, Any
+from typing import Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import Row, select, func
+from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.utils import get_all_scalars, scalar, get_all
-from app.models import Genre, MovieGenreAssociation, Movie
+from app.db.utils import get_all, get_all_scalars, scalar
+from app.models import Genre, Movie, MovieGenreAssociation
 from app.repository.base_repo import AbstractCRUD
-from app.schemas.genres import GenreInDB, GenreUpdate
+from app.schemas.genres import GenreUpdate
 
 
 class GenreCRUD(AbstractCRUD):
@@ -21,13 +21,17 @@ class GenreCRUD(AbstractCRUD):
                     func.coalesce(
                         func.array_agg(
                             func.json_build_object(
-                                "uuid", Movie.uuid,
-                                "title", Movie.title,
-                                "release_year", Movie.release_year,
-                                "director_id", Movie.director_id,
+                                "uuid",
+                                Movie.uuid,
+                                "title",
+                                Movie.title,
+                                "release_year",
+                                Movie.release_year,
+                                "director_id",
+                                Movie.director_id,
                             )
                         ),
-                        None
+                        None,
                     ).label("movies"),
                 )
                 .outerjoin(MovieGenreAssociation, MovieGenreAssociation.genre_id == Genre.uuid)
@@ -38,17 +42,17 @@ class GenreCRUD(AbstractCRUD):
             return await get_all(db, base_query)
         return await scalar(db, select(Genre).where(filter))
 
-
     async def get_all(self, db: AsyncSession, skip: int = 0, limit: int = 20) -> Sequence[Genre] | Sequence[Row[Any]]:
         return await get_all_scalars(db, select(Genre).order_by(Genre.name).offset(skip).limit(limit))
 
-
     async def create(self, db: AsyncSession, name: str) -> Genre:
-        new_genre = Genre(name=name, uuid=uuid.uuid4())
-        db.add(new_genre)
-        await db.flush()
-        return new_genre
-
+        existing_genre = await self.get_one(db, name=name)
+        if not existing_genre:
+            new_genre = Genre(name=name, uuid=uuid.uuid4())
+            db.add(new_genre)
+            await db.flush()
+            return new_genre
+        return existing_genre  # type: ignore
 
     async def update(self, db: AsyncSession, genre_data: GenreUpdate) -> Genre | Sequence[Row[Any]] | None:
         genre = await self.get_one(db, id=genre_data.uuid)
