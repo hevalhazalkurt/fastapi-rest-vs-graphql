@@ -3,12 +3,12 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
 from app.repository.movies import MovieCRUD, get_movie_crud
-from app.schemas.movies import MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieCreate, MovieUpdate
+from app.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
 
 
 class MovieService:
@@ -39,7 +39,6 @@ class MovieService:
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
-
     async def get_movie_by_id(self, id: UUID, extended: bool = False) -> MovieInDB | MovieExtended:
         result = None
         try:
@@ -56,17 +55,16 @@ class MovieService:
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
-
     async def create_movie(self, movie_data: MovieCreate) -> MovieInDB:
         result = None
         try:
             result = await self.crud.create(self.db, movie_data=movie_data)
+            # TODO: Add step to create genre relationship here
             return MovieInDB.model_validate(result)
         except Exception as e:
             error_detail = "An error occurred while creating a movie." if result else "Director not found"
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
-
 
     async def update_movie(self, movie_data: MovieUpdate) -> MovieInDB:
         try:
@@ -74,5 +72,14 @@ class MovieService:
             return MovieInDB.model_validate(result)
         except Exception as e:
             error_detail = "An error occurred while updating a movie."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
+
+    async def remove_movie(self, id: UUID) -> MovieInDB:
+        try:
+            result = await self.crud.delete(self.db, id=id)
+            return MovieInDB.model_validate(result)
+        except Exception as e:
+            error_detail = "An error occurred while removing a movie."
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)

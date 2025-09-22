@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 
 from . import status
-from .rest import directors
-from .rest import movies
+from .rest import directors, movies
 
 router = APIRouter()
 

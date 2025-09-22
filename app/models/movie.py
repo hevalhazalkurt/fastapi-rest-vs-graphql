@@ -7,6 +7,6 @@ from app.models.mixins import UUIDMixin
 
 class Movie(BaseDBModel, UUIDMixin):
     title: Mapped[str] = mapped_column(String, index=True)
-    release_year: Mapped[int] = mapped_column(Integer)
+    release_year: Mapped[int] = mapped_column(Integer, nullable=True)
 
-    director_id: Mapped[UUID] = mapped_column(UUID, ForeignKey("director.uuid"))
+    director_id: Mapped[UUID] = mapped_column(UUID, ForeignKey("director.uuid"), nullable=True)
