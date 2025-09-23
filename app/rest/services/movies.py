@@ -76,6 +76,7 @@ class MovieService:
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
     async def update_movie(self, movie_data: MovieUpdate) -> MovieInDB:
+        # TODO: Add updating genre step here
         try:
             result = await self.crud.update(self.db, movie_data=movie_data)
             return MovieInDB.model_validate(result)
