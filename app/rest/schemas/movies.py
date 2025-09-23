@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import ConfigDict
 
-from app.schemas.base_schema import ResponseSchema
+from app.rest.schemas.base_schema import ResponseSchema
 
 
 class MovieOrder(Enum):

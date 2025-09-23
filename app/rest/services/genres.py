@@ -7,9 +7,9 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
-from app.repository.genres import GenreCRUD, get_genre_crud
-from app.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
-from app.schemas.movies import MovieInDB
+from app.rest.repository.genres import GenreCRUD, get_genre_crud
+from app.rest.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
+from app.rest.schemas.movies import MovieInDB
 
 
 class GenresService:

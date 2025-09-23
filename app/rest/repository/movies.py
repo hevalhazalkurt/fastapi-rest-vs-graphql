@@ -2,15 +2,14 @@ import uuid
 from typing import Any, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException
 from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.utils import get_all, get_all_scalars, scalar
 from app.models import Director, Genre, Movie, MovieGenreAssociation
-from app.repository.base_repo import AbstractCRUD
-from app.repository.directors import DirectorCRUD
-from app.schemas.movies import MovieCreate, MovieOrder, MovieSort, MovieUpdate
+from app.rest.repository.base_repo import AbstractCRUD
+from app.rest.repository.directors import DirectorCRUD
+from app.rest.schemas.movies import MovieCreate, MovieOrder, MovieSort, MovieUpdate
 
 
 class MovieCRUD(AbstractCRUD):

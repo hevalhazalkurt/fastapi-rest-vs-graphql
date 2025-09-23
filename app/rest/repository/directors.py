@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.utils import get_all, get_all_scalars, scalar
 from app.models import Director, Movie
-from app.repository.base_repo import AbstractCRUD
-from app.schemas.directors import DirectorUpdate
+from app.rest.repository.base_repo import AbstractCRUD
+from app.rest.schemas.directors import DirectorUpdate
 
 
 class DirectorCRUD(AbstractCRUD):

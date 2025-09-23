@@ -7,9 +7,9 @@ from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
-from app.repository.directors import DirectorCRUD, get_director_crud
-from app.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
-from app.schemas.movies import MovieInDirector
+from app.rest.repository.directors import DirectorCRUD, get_director_crud
+from app.rest.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
+from app.rest.schemas.movies import MovieInDirector
 
 
 class DirectorsService:

@@ -3,8 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
-from app.services.directors import DirectorsService
+from app.rest.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
+from app.rest.services.directors import DirectorsService
 
 router = APIRouter()
 

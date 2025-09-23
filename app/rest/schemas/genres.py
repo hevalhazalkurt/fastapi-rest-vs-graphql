@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from app.schemas.base_schema import ResponseSchema
-from app.schemas.movies import MovieInDB
+from app.rest.schemas.base_schema import ResponseSchema
+from app.rest.schemas.movies import MovieInDB
 
 
 class GenreCreate(ResponseSchema):

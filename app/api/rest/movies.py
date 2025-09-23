@@ -3,8 +3,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
-from app.services.movies import MovieService
+from app.rest.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
+from app.rest.services.movies import MovieService
 
 router = APIRouter()
 

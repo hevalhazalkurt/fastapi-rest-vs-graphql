@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.utils import get_all, get_all_scalars, scalar
 from app.models import Genre, Movie, MovieGenreAssociation
-from app.repository.base_repo import AbstractCRUD
-from app.schemas.genres import GenreUpdate
+from app.rest.repository.base_repo import AbstractCRUD
+from app.rest.schemas.genres import GenreUpdate
 
 
 class GenreCRUD(AbstractCRUD):
