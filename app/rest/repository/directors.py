@@ -4,6 +4,7 @@ from uuid import UUID
 
 from sqlalchemy import Row, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from strawberry import ID
 
 from app.db.utils import get_all, get_all_scalars, scalar
 from app.models import Director, Movie
@@ -12,7 +13,7 @@ from app.rest.schemas.directors import DirectorUpdate
 
 
 class DirectorCRUD(AbstractCRUD):
-    async def get_one(self, db: AsyncSession, id: UUID | None = None, name: str | None = None, with_movies: bool = False) -> Director | Sequence[Row[Any]] | None:
+    async def get_one(self, db: AsyncSession, id: UUID | ID | None = None, name: str | None = None, with_movies: bool = False) -> Director | Sequence[Row[Any]] | None:
         filter = Director.uuid == id if id else Director.name == name
         if with_movies:
             base_query = (

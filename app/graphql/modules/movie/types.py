@@ -1,6 +1,8 @@
 from enum import Enum
 
-from strawberry import ID, enum, input, type
+from strawberry import ID, enum, input, type, experimental
+
+from app.rest.schemas.movies import MovieInDirector
 
 
 @enum
@@ -30,6 +32,11 @@ class MovieType(MovieBase):
 class MovieExtendedType(MovieType):
     director: str | None = None
     genre: str | None = None
+
+
+@experimental.pydantic.type(model=MovieInDirector, all_fields=True)
+class MovieInDirectorType:
+    pass
 
 
 @input

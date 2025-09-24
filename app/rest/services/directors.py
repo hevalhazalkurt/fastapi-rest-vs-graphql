@@ -2,11 +2,15 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from strawberry import ID
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
+from app.db.utils import get_all
+from app.models import Movie
 from app.rest.repository.directors import DirectorCRUD, get_director_crud
 from app.rest.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
 from app.rest.schemas.movies import MovieInDirector
@@ -37,7 +41,7 @@ class DirectorsService:
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
-    async def get_director_by_id(self, id: UUID, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
+    async def get_director_by_id(self, id: UUID | ID, with_movies: bool = False) -> DirectorInDB | DirectorExtended:
         result = None
         try:
             result = await self.crud.get_one(self.db, id=id, with_movies=with_movies)
@@ -62,6 +66,33 @@ class DirectorsService:
             return DirectorInDB.model_validate(result)
         except Exception as e:
             error_detail = f"An error occurred while fetching director. {e}" if result else f"Director with name {name} not found."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
+
+    async def get_director_movies(self, director_ids: list[UUID]) -> dict:
+        try:
+            if not director_ids:
+                return {}
+
+            query = (
+                select(
+                    Movie.director_id,
+                    func.array_agg(
+                        func.jsonb_build_object(
+                            "uuid", Movie.uuid,
+                            "title", Movie.title,
+                            "release_year", Movie.release_year
+                        )))
+                .where(Movie.director_id.in_(director_ids)).group_by(Movie.director_id)
+            )
+            result = await get_all(self.db, query)
+            director_movies_map = {
+                director_id: [MovieInDirector.model_validate(m) for m in movies]
+                for director_id, movies in result
+            }
+            return director_movies_map
+        except Exception as e:
+            error_detail = f"An error occurred while fetching directors' movies. {e}"
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
