@@ -1,7 +1,8 @@
 from enum import Enum
 
-from strawberry import ID, enum, input, type, experimental
+from strawberry import ID, auto, enum, experimental, input, type
 
+from app.graphql.modules.base_type import StrawberryPydanticType
 from app.rest.schemas.movies import MovieInDirector
 
 
@@ -34,9 +35,11 @@ class MovieExtendedType(MovieType):
     genre: str | None = None
 
 
-@experimental.pydantic.type(model=MovieInDirector, all_fields=True)
-class MovieInDirectorType:
-    pass
+@experimental.pydantic.type(model=MovieInDirector)
+class MovieInDirectorType(StrawberryPydanticType):
+    uuid: auto
+    title: auto
+    release_year: auto
 
 
 @input

@@ -2,7 +2,7 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 from strawberry import ID
@@ -75,21 +75,12 @@ class DirectorsService:
                 return {}
 
             query = (
-                select(
-                    Movie.director_id,
-                    func.array_agg(
-                        func.jsonb_build_object(
-                            "uuid", Movie.uuid,
-                            "title", Movie.title,
-                            "release_year", Movie.release_year
-                        )))
-                .where(Movie.director_id.in_(director_ids)).group_by(Movie.director_id)
+                select(Movie.director_id, func.array_agg(func.jsonb_build_object("uuid", Movie.uuid, "title", Movie.title, "release_year", Movie.release_year)))
+                .where(Movie.director_id.in_(director_ids))
+                .group_by(Movie.director_id)
             )
             result = await get_all(self.db, query)
-            director_movies_map = {
-                director_id: [MovieInDirector.model_validate(m) for m in movies]
-                for director_id, movies in result
-            }
+            director_movies_map = {director_id: [MovieInDirector.model_validate(m) for m in movies] for director_id, movies in result}
             return director_movies_map
         except Exception as e:
             error_detail = f"An error occurred while fetching directors' movies. {e}"

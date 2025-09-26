@@ -5,9 +5,10 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry import field
 from strawberry.dataloader import DataLoader
-from strawberry.fastapi import GraphQLRouter, BaseContext
+from strawberry.fastapi import BaseContext, GraphQLRouter
 
 from app.db.session import get_db
+from app.graphql.modules.director.mutations import DirectorMutation
 from app.graphql.modules.director.queries import DirectorQuery
 from app.rest.schemas.movies import MovieInDirector
 from app.rest.services.directors import DirectorsService
@@ -24,6 +25,7 @@ class Context(BaseContext):
         movies_map: dict = await self.director_service.get_director_movies(director_ids)
         return [movies_map.get(director_id, []) for director_id in director_ids]
 
+
 async def get_graphql_context(
     db: AsyncSession = Depends(get_db),
     director_service: DirectorsService = Depends(DirectorsService),
@@ -38,10 +40,15 @@ class Query(DirectorQuery):
         return "Hello GraphQL!"
 
 
-schema = strawberry.Schema(query=Query)
+@strawberry.type
+class Mutation(DirectorMutation):
+    pass
+
+
+schema = strawberry.Schema(query=Query, mutation=Mutation)
 
 graphql_app = GraphQLRouter(
     schema,
-    context_getter=get_graphql_context,
-    graphiql=True
+    context_getter=get_graphql_context,  # type: ignore
+    graphiql=True,
 )

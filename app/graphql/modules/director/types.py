@@ -1,36 +1,43 @@
-from strawberry import experimental, Info, field
+from strawberry import Info, auto, experimental, field
 
+from app.graphql.modules.base_type import StrawberryPydanticType
 from app.graphql.modules.movie.types import MovieInDirectorType
-from app.rest.schemas.directors import DirectorCreate, DirectorInDB, DirectorExtended, DirectorUpdate
+from app.rest.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
 
 
-@experimental.pydantic.type(model=DirectorCreate, all_fields=True)
+@experimental.pydantic.type(model=DirectorCreate)
 class DirectorBase:
-    pass
+    name: auto
 
 
-@experimental.pydantic.type(model=DirectorInDB, all_fields=True)
-class DirectorType:
+@experimental.pydantic.type(model=DirectorInDB)
+class DirectorType(StrawberryPydanticType):
+    uuid: auto
+    name: auto
+
     @field
     async def movies(
-            self,
-            info: Info,
+        self,
+        info: Info,
     ) -> list[MovieInDirectorType] | None:
         loader = info.context.director_movies_loader
         movies_list = await loader.load(self.uuid)
         return [MovieInDirectorType.from_pydantic(m) for m in movies_list]
 
 
-@experimental.pydantic.type(model=DirectorExtended, all_fields=True)
+@experimental.pydantic.type(model=DirectorExtended)
 class DirectorExtendedType:
-    pass
+    uuid: auto
+    name: auto
+    movies: auto
 
 
-@experimental.pydantic.input(model=DirectorCreate, all_fields=True)
+@experimental.pydantic.input(model=DirectorCreate)
 class DirectorCreateInput:
-    pass
+    name: auto
 
 
-@experimental.pydantic.input(model=DirectorUpdate, all_fields=True)
+@experimental.pydantic.input(model=DirectorUpdate)
 class DirectorUpdateInput:
-    pass
+    uuid: auto
+    name: auto
