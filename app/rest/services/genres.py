@@ -2,11 +2,14 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
+from app.db.utils import get_all
+from app.models import Movie, MovieGenreAssociation
 from app.rest.repository.genres import GenreCRUD, get_genre_crud
 from app.rest.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
 from app.rest.schemas.movies import MovieInDB
@@ -29,6 +32,39 @@ class GenresService:
             error_detail = "An error occurred while fetching genres."
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
+
+    async def get_genre_movies(self, genre_ids: list[UUID]) -> dict:
+        try:
+            if not genre_ids:
+                return {}
+
+            query = (
+                select(
+                    MovieGenreAssociation.genre_id,
+                    func.array_agg(
+                        func.jsonb_build_object(
+                            "uuid",
+                            Movie.uuid,
+                            "title",
+                            Movie.title,
+                            "release_year",
+                            Movie.release_year,
+                            "director_id",
+                            Movie.director_id,
+                        )
+                    ),
+                )
+                .join(Movie, Movie.uuid == MovieGenreAssociation.movie_id)
+                .where(MovieGenreAssociation.genre_id.in_(genre_ids))
+                .group_by(MovieGenreAssociation.genre_id)
+            )
+            result = await get_all(self.db, query)
+            director_movies_map = {genre_id: [MovieInDB.model_validate(m) for m in movies] for genre_id, movies in result}
+            return director_movies_map
+        except Exception as e:
+            error_detail = f"An error occurred while fetching genre' movies. {e}"
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
     async def get_genre_by_id(self, id: UUID, with_movies: bool = False) -> GenreInDB | GenreExtended:
         result = None

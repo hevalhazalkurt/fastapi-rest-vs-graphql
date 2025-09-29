@@ -1,32 +1,43 @@
-from typing import TYPE_CHECKING
+from strawberry import Info, auto, experimental, field
 
-from strawberry import ID, input, type
+from app.graphql.modules.base_type import StrawberryPydanticType
+from app.graphql.modules.movie.types import MovieInGenreType
+from app.rest.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
 
-if TYPE_CHECKING:
-    from app.graphql.modules.movie.types import MovieType
 
-
-@type
+@experimental.pydantic.type(model=GenreCreate)
 class GenreBase:
-    name: str
+    name: auto
 
 
-@type
-class GenreType(GenreBase):
-    uuid: ID
+@experimental.pydantic.type(model=GenreInDB)
+class GenreType(StrawberryPydanticType):
+    uuid: auto
+    name: auto
+
+    @field
+    async def movies(
+        self,
+        info: Info,
+    ) -> list[MovieInGenreType] | None:
+        loader = info.context.genre_movies_loader
+        movies_list = await loader.load(self.uuid)
+        return [MovieInGenreType.from_pydantic(m) for m in movies_list]
 
 
-@type
-class GenreExtendedType(GenreType):
-    movies: list[MovieType] | None = []
+@experimental.pydantic.type(model=GenreExtended)
+class GenreExtendedType:
+    uuid: auto
+    name: auto
+    movies: auto
 
 
-@input
+@experimental.pydantic.input(model=GenreCreate)
 class GenreCreateInput:
-    name: str
+    name: auto
 
 
-@input
+@experimental.pydantic.input(model=GenreUpdate)
 class GenreUpdateInput:
-    uuid: ID
-    name: str
+    uuid: auto
+    name: auto

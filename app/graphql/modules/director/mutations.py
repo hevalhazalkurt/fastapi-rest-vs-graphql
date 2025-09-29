@@ -2,15 +2,10 @@ from uuid import UUID
 
 from strawberry import ID, Info, mutation, type
 
+from app.graphql.modules.base_type import StatusResponse
 from app.graphql.modules.director.types import DirectorCreateInput, DirectorType, DirectorUpdateInput
 from app.rest.schemas.directors import DirectorCreate, DirectorUpdate
 from app.rest.services.directors import DirectorsService
-
-
-@type
-class StatusResponse:
-    success: bool
-    message: str
 
 
 @type

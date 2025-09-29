@@ -3,7 +3,7 @@ from enum import Enum
 from strawberry import ID, auto, enum, experimental, input, type
 
 from app.graphql.modules.base_type import StrawberryPydanticType
-from app.rest.schemas.movies import MovieInDirector
+from app.rest.schemas.movies import MovieCreate, MovieInDB, MovieInDirector
 
 
 @enum
@@ -18,15 +18,17 @@ class MovieSort(Enum):
     desc = "desc"
 
 
-@type
+@experimental.pydantic.type(model=MovieCreate)
 class MovieBase:
-    title: str
-    year: int | None = None
+    title: auto
+    release_year: auto
+    director_id: auto
+    genre: auto
 
 
-@type
-class MovieType(MovieBase):
-    uuid: ID
+@experimental.pydantic.type(model=MovieInDB)
+class MovieType:
+    uuid: auto
 
 
 @type
@@ -40,6 +42,14 @@ class MovieInDirectorType(StrawberryPydanticType):
     uuid: auto
     title: auto
     release_year: auto
+
+
+@experimental.pydantic.type(model=MovieInDB)
+class MovieInGenreType(StrawberryPydanticType):
+    uuid: auto
+    title: auto
+    release_year: auto
+    director_id: auto
 
 
 @input

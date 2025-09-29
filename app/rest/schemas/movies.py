@@ -27,6 +27,7 @@ class MovieInDB(ResponseSchema):
     uuid: UUID
     title: str
     release_year: int | None = None
+    director_id: UUID | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
