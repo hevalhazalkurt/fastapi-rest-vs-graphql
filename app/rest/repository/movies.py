@@ -74,7 +74,7 @@ class MovieCRUD(AbstractCRUD):
             movie.title = movie_data.title if movie_data.title else movie.title
             movie.release_year = movie_data.release_year if movie_data.release_year else movie.release_year
             movie.director_id = movie_data.director_id if movie_data.director_id and director else movie.director_id  # type: ignore
-            db.add(director)
+            db.add(movie)
             await db.flush()
         return movie
 

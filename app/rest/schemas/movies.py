@@ -50,4 +50,4 @@ class MovieUpdate(ResponseSchema):
     title: str | None = None
     release_year: int | None = None
     director_id: UUID | None = None
-    # TODO: Add genre field to update
+    genre: str | None = None

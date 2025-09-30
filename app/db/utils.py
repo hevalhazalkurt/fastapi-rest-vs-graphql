@@ -14,3 +14,7 @@ async def get_all(db: AsyncSession, query: Executable) -> Sequence[Row[Any]]:
 
 async def scalar(db: AsyncSession, query: Executable) -> Any | None:
     return await db.scalar(query)
+
+
+async def execute(db: AsyncSession, query: Executable, *args, **kwargs) -> Any | None:
+    return await db.execute(query, *args, **kwargs)

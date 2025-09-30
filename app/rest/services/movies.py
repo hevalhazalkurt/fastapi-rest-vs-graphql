@@ -2,12 +2,14 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
-from app.models import MovieGenreAssociation
+from app.db.utils import execute
+from app.models import Movie, MovieGenreAssociation
 from app.rest.repository.genres import get_genre_crud
 from app.rest.repository.movies import MovieCRUD, get_movie_crud
 from app.rest.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
@@ -76,9 +78,18 @@ class MovieService:
             raise HTTPException(status_code=HTTP_500_INTERNAL_SERVER_ERROR, detail=error_detail)
 
     async def update_movie(self, movie_data: MovieUpdate) -> MovieInDB:
-        # TODO: Add updating genre step here
         try:
             result = await self.crud.update(self.db, movie_data=movie_data)
+            if movie_data.genre and isinstance(result, Movie):
+                await execute(self.db, delete(MovieGenreAssociation).where(MovieGenreAssociation.movie_id == result.uuid))
+                logger.info(f"Genre associations deleted for movie: {result.uuid}")
+                genres = movie_data.genre.split("|")
+                genre_crud = get_genre_crud()
+                for g in genres:
+                    genre_name = g.strip()
+                    genre = await genre_crud.create(self.db, genre_name)
+                    new_association = MovieGenreAssociation(movie_id=result.uuid, genre_id=genre.uuid)
+                    self.db.add(new_association)
             return MovieInDB.model_validate(result)
         except Exception as e:
             error_detail = "An error occurred while updating a movie."
