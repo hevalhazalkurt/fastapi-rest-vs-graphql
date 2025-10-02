@@ -2,14 +2,14 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
-from sqlalchemy import delete
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from app.core.logging_setup import logger
 from app.db.session import get_db
-from app.db.utils import execute
-from app.models import Movie, MovieGenreAssociation
+from app.db.utils import execute, get_all
+from app.models import Director, Genre, Movie, MovieGenreAssociation
 from app.rest.repository.genres import get_genre_crud
 from app.rest.repository.movies import MovieCRUD, get_movie_crud
 from app.rest.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
@@ -56,6 +56,31 @@ class MovieService:
             return MovieInDB.model_validate(result)
         except Exception as e:
             error_detail = f"An error occurred while fetching movie. {e}" if result else f"Movie with id {id} not found."
+            logger.error(f"{error_detail} - details: {e}", exc_info=e)
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
+
+    async def get_movie_details(self, movie_ids: list[UUID]) -> dict:
+        try:
+            if not movie_ids:
+                return {}
+
+            query = (
+                select(
+                    Movie.uuid,
+                    Director.name,
+                    func.array_agg(Genre.name).label("genres"),
+                )
+                .outerjoin(Director, Director.uuid == Movie.director_id)
+                .outerjoin(MovieGenreAssociation, MovieGenreAssociation.movie_id == Movie.uuid)
+                .outerjoin(Genre, Genre.uuid == MovieGenreAssociation.genre_id)
+                .where(Movie.uuid.in_(movie_ids))
+                .group_by(Movie.uuid, Director.name)
+            )
+            result = await get_all(self.db, query)
+            movies_map = {movie_id: {"director": director, "genre": " | ".join([g for g in genres]) if genres else None} for movie_id, director, genres in result}
+            return movies_map
+        except Exception as e:
+            error_detail = f"An error occurred while fetching movies' details. {e}"
             logger.error(f"{error_detail} - details: {e}", exc_info=e)
             raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=error_detail)
 
