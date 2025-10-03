@@ -8,6 +8,9 @@ from app.rest.services.directors import DirectorsService
 class DirectorQuery:
     @field
     async def director(self, id: ID, info: Info) -> DirectorType | None:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: DirectorsService = info.context.director_service
 
         director_data = await service.get_director_by_id(id=id, with_movies=True)
@@ -24,6 +27,9 @@ class DirectorQuery:
         skip: int = 0,
         limit: int = 100,
     ) -> list[DirectorType]:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: DirectorsService = info.context.director_service
 
         directors_data = await service.get_all_directors(skip=skip, limit=limit, with_movies=False)

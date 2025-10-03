@@ -16,6 +16,9 @@ class DirectorMutation:
         director_input: DirectorCreateInput,
         info: Info,
     ) -> DirectorType:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: DirectorsService = info.context.director_service
 
         pydantic_data = DirectorCreate.model_validate(director_input)
@@ -29,6 +32,9 @@ class DirectorMutation:
         director_input: DirectorUpdateInput,
         info: Info,
     ) -> DirectorType:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: DirectorsService = info.context.director_service
         pydantic_data = DirectorUpdate.model_validate(director_input)
         updated_director = await service.update_director(director_data=pydantic_data)
@@ -41,6 +47,9 @@ class DirectorMutation:
         id: ID,
         info: Info,
     ) -> StatusResponse:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: DirectorsService = info.context.director_service
 
         try:

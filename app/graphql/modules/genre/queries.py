@@ -10,6 +10,9 @@ from app.rest.services.genres import GenresService
 class GenreQuery:
     @field
     async def genre(self, id: ID, info: Info) -> GenreType | None:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: GenresService = info.context.genre_service
 
         genre_data = await service.get_genre_by_id(id=UUID(id))
@@ -26,6 +29,9 @@ class GenreQuery:
         skip: int = 0,
         limit: int = 100,
     ) -> list[GenreType] | None:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: GenresService = info.context.genre_service
 
         genres_data = await service.get_all_genres(skip=skip, limit=limit)

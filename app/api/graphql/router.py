@@ -7,6 +7,7 @@ from strawberry import field
 from strawberry.dataloader import DataLoader
 from strawberry.fastapi import BaseContext, GraphQLRouter
 
+from app.auth.security import get_current_user
 from app.db.session import get_db
 from app.graphql.modules.director.mutations import DirectorMutation
 from app.graphql.modules.director.queries import DirectorQuery
@@ -21,9 +22,11 @@ from app.rest.services.movies import MovieService
 
 
 class Context(BaseContext):
-    def __init__(self, db: AsyncSession, director_service: DirectorsService, genre_service: GenresService, movie_service: MovieService):
+    def __init__(self, db: AsyncSession, director_service: DirectorsService, genre_service: GenresService, movie_service: MovieService, current_user: str | None = None):
         super().__init__()
         self.db = db
+        self.current_user = current_user
+
         self.director_service = director_service
         self.director_movies_loader = DataLoader(load_fn=self._load_movies_for_directors)
 
@@ -51,8 +54,9 @@ async def get_graphql_context(
     director_service: DirectorsService = Depends(DirectorsService),
     genre_service: GenresService = Depends(GenresService),
     movie_service: MovieService = Depends(MovieService),
+    current_user: str | None = Depends(get_current_user)
 ) -> Context:
-    return Context(db=db, director_service=director_service, genre_service=genre_service, movie_service=movie_service)
+    return Context(db=db, director_service=director_service, genre_service=genre_service, movie_service=movie_service, current_user=current_user)
 
 
 @strawberry.type

@@ -12,6 +12,9 @@ from app.rest.services.movies import MovieService
 class MovieMutation:
     @mutation
     async def create_movie(self, info: Info, movie_input: MovieCreateInput) -> MovieType:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: MovieService = info.context.movie_service
 
         pydantic_data = MovieCreate.model_validate(movie_input)
@@ -20,6 +23,9 @@ class MovieMutation:
 
     @mutation
     async def update_movie(self, info: Info, movie_input: MovieUpdateInput) -> MovieType:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: MovieService = info.context.movie_service
         pydantic_data = MovieUpdate.model_validate(movie_input)
         updated_movie = await service.update_movie(pydantic_data)
@@ -27,6 +33,9 @@ class MovieMutation:
 
     @mutation
     async def delete_movie(self, info: Info, id: ID) -> StatusResponse:
+        if not info.context.current_user:
+            raise Exception("Not authenticated!")
+
         service: MovieService = info.context.movie_service
 
         try:
