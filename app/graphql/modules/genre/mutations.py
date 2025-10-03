@@ -14,6 +14,8 @@ class GenreMutation:
     async def create_genre(self, info: Info, genre_input: GenreCreateInput) -> GenreType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: GenresService = info.context.genre_service
 
@@ -26,6 +28,8 @@ class GenreMutation:
     async def update_genre(self, info: Info, genre_input: GenreUpdateInput) -> GenreType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: GenresService = info.context.genre_service
 
@@ -38,6 +42,8 @@ class GenreMutation:
     async def delete_genre(self, info: Info, id: ID) -> StatusResponse:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: GenresService = info.context.genre_service
 

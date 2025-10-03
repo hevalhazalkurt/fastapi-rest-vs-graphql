@@ -18,6 +18,8 @@ class DirectorMutation:
     ) -> DirectorType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: DirectorsService = info.context.director_service
 
@@ -34,6 +36,8 @@ class DirectorMutation:
     ) -> DirectorType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: DirectorsService = info.context.director_service
         pydantic_data = DirectorUpdate.model_validate(director_input)
@@ -49,6 +53,8 @@ class DirectorMutation:
     ) -> StatusResponse:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: DirectorsService = info.context.director_service
 

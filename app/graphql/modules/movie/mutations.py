@@ -14,6 +14,8 @@ class MovieMutation:
     async def create_movie(self, info: Info, movie_input: MovieCreateInput) -> MovieType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: MovieService = info.context.movie_service
 
@@ -25,6 +27,8 @@ class MovieMutation:
     async def update_movie(self, info: Info, movie_input: MovieUpdateInput) -> MovieType:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: MovieService = info.context.movie_service
         pydantic_data = MovieUpdate.model_validate(movie_input)
@@ -35,6 +39,8 @@ class MovieMutation:
     async def delete_movie(self, info: Info, id: ID) -> StatusResponse:
         if not info.context.current_user:
             raise Exception("Not authenticated!")
+        elif "admin" not in info.context.current_user.get("scopes", []):
+            raise Exception("Not authorized!")
 
         service: MovieService = info.context.movie_service
 

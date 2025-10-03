@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     ECHO: bool | None = None
     MAX_OVERFLOW: int | None = None
     API_SECRET_KEY: str | None = None
+    API_ADMIN_KEY: str | None = None
 
     model_config = SettingsConfigDict(env_file=".env")
 

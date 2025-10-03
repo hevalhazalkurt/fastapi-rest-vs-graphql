@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth.security import get_current_user
+from app.auth.security import get_current_user, require_scope
 from app.rest.schemas.genres import GenreCreate, GenreExtended, GenreInDB, GenreUpdate
 from app.rest.services.genres import GenresService
 
@@ -28,15 +28,15 @@ async def get_genre(id: UUID | None = None, name: str | None = None, with_movies
 
 
 @router.post("/genre")
-async def create_genre(genre_data: GenreCreate, service: GenresService = Depends(GenresService), user: str = Depends(get_current_user)) -> GenreInDB:
+async def create_genre(genre_data: GenreCreate, service: GenresService = Depends(GenresService), user: str = Depends(require_scope(["admin"]))) -> GenreInDB:
     return await service.create_genre(genre_data)
 
 
 @router.patch("/genre")
-async def update_genre(genre_data: GenreUpdate, service: GenresService = Depends(GenresService), user: str = Depends(get_current_user)) -> GenreInDB:
+async def update_genre(genre_data: GenreUpdate, service: GenresService = Depends(GenresService), user: str = Depends(require_scope(["admin"]))) -> GenreInDB:
     return await service.update_genre(genre_data)
 
 
 @router.delete("/genre/{id}")
-async def remove_genre(id: UUID, service: GenresService = Depends(GenresService), user: str = Depends(get_current_user)) -> GenreInDB:
+async def remove_genre(id: UUID, service: GenresService = Depends(GenresService), user: str = Depends(require_scope(["admin"]))) -> GenreInDB:
     return await service.remove_genre(id)

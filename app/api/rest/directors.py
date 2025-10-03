@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.auth.security import get_current_user
+from app.auth.security import get_current_user, require_scope
 from app.rest.schemas.directors import DirectorCreate, DirectorExtended, DirectorInDB, DirectorUpdate
 from app.rest.services.directors import DirectorsService
 
@@ -28,15 +28,15 @@ async def get_director(id: UUID | None = None, name: str | None = None, with_mov
 
 
 @router.post("/director")
-async def create_director(director_data: DirectorCreate, service: DirectorsService = Depends(DirectorsService), user: str = Depends(get_current_user)) -> DirectorInDB:
+async def create_director(director_data: DirectorCreate, service: DirectorsService = Depends(DirectorsService), user: str = Depends(require_scope(["admin"]))) -> DirectorInDB:
     return await service.create_director(director_data)
 
 
 @router.patch("/director")
-async def update_director(director_data: DirectorUpdate, service: DirectorsService = Depends(DirectorsService), user: str = Depends(get_current_user)) -> DirectorInDB:
+async def update_director(director_data: DirectorUpdate, service: DirectorsService = Depends(DirectorsService), user: str = Depends(require_scope(["admin"]))) -> DirectorInDB:
     return await service.update_director(director_data)
 
 
 @router.delete("/director/{id}")
-async def remove_director(id: UUID, service: DirectorsService = Depends(DirectorsService), user: str = Depends(get_current_user)) -> DirectorInDB:
+async def remove_director(id: UUID, service: DirectorsService = Depends(DirectorsService), user: str = Depends(require_scope(["admin"]))) -> DirectorInDB:
     return await service.remove_director(id)

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.auth.security import get_current_user
+from app.auth.security import get_current_user, require_scope
 from app.rest.schemas.movies import MovieCreate, MovieExtended, MovieInDB, MovieOrder, MovieSort, MovieUpdate
 from app.rest.services.movies import MovieService
 
@@ -23,15 +23,15 @@ async def get_movie(id: UUID, extended: bool = False, service: MovieService = De
 
 
 @router.post("/movie")
-async def create_movie(movie_data: MovieCreate, service: MovieService = Depends(MovieService), user: str = Depends(get_current_user)) -> MovieInDB:
+async def create_movie(movie_data: MovieCreate, service: MovieService = Depends(MovieService), user: str = Depends(require_scope(["admin"]))) -> MovieInDB:
     return await service.create_movie(movie_data)
 
 
 @router.patch("/movie")
-async def update_movie(movie_data: MovieUpdate, service: MovieService = Depends(MovieService), user: str = Depends(get_current_user)) -> MovieInDB:
+async def update_movie(movie_data: MovieUpdate, service: MovieService = Depends(MovieService), user: str = Depends(require_scope(["admin"]))) -> MovieInDB:
     return await service.update_movie(movie_data)
 
 
 @router.delete("/movie/{id}")
-async def remove_movie(id: UUID, service: MovieService = Depends(MovieService), user: str = Depends(get_current_user)) -> MovieInDB:
+async def remove_movie(id: UUID, service: MovieService = Depends(MovieService), user: str = Depends(require_scope(["admin"]))) -> MovieInDB:
     return await service.remove_movie(id)
