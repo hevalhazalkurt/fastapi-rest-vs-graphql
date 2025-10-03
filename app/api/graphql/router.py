@@ -22,7 +22,7 @@ from app.rest.services.movies import MovieService
 
 
 class Context(BaseContext):
-    def __init__(self, db: AsyncSession, director_service: DirectorsService, genre_service: GenresService, movie_service: MovieService, current_user: str | None = None):
+    def __init__(self, db: AsyncSession, director_service: DirectorsService, genre_service: GenresService, movie_service: MovieService, current_user: dict | None = None):
         super().__init__()
         self.db = db
         self.current_user = current_user
@@ -54,7 +54,7 @@ async def get_graphql_context(
     director_service: DirectorsService = Depends(DirectorsService),
     genre_service: GenresService = Depends(GenresService),
     movie_service: MovieService = Depends(MovieService),
-    current_user: str | None = Depends(get_current_user)
+    current_user: dict | None = Depends(get_current_user),
 ) -> Context:
     return Context(db=db, director_service=director_service, genre_service=genre_service, movie_service=movie_service, current_user=current_user)
 
