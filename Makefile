@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 
-.PHONY: install run-local static-checks lint format test
+.PHONY: install run-local static-checks lint format migrate seed
 
 install:
 	@echo "--> Installing local dependencies with Poetry..."
@@ -23,5 +23,14 @@ format:
 	@echo "--> Formatting code and fixing issues with Ruff..."
 	@poetry run ruff format
 	@poetry run ruff check --fix --exit-non-zero-on-fix
+
+
+migrate:
+	@echo "--> Applying database migrations with Alembic..."
+	@poetry run alembic upgrade head
+
+seed:
+	@echo "--> Populating the database with dummy data from ./data/get_dummy_data.py..."
+	@poetry run python data/get_dummy_data.py
 
 
